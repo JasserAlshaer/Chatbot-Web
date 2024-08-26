@@ -12,6 +12,8 @@ namespace Chatbot_Web.Controllers
     [ApiController]
     public class AuthanticationController : ControllerBase
     {
+
+
         private readonly ChatbotContext _context;
         public AuthanticationController(ChatbotContext context)
         {
