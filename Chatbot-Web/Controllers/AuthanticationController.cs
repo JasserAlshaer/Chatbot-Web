@@ -4,6 +4,7 @@ using Chatbot_Web.Entities;
 using Chatbot_Web.Helper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace Chatbot_Web.Controllers
@@ -32,7 +33,9 @@ namespace Chatbot_Web.Controllers
                 FirstName = input.FirstName,
                 LastName = input.LastName,
                 Password = HashingHelper.GenerateSHA384String(input.Password),
-                Username = HashingHelper.GenerateSHA384String(input.Email)
+                Username = HashingHelper.GenerateSHA384String(input.Email),
+                Phone = input.Phone,
+                IsEmailVerified = true
             };
             _context.Add(client);
             _context.SaveChanges();
@@ -70,11 +73,21 @@ namespace Chatbot_Web.Controllers
 
             else
             {
-                var token = TokenHelper.GenerateJwtToken(client);
+               
                 client.IsLoggedIn = true;
                 client.LastLoginDateTime = DateTime.Now;
                 _context.Update(client);
                 _context.SaveChanges();
+                Conservation conservation = new Conservation()
+                {
+                    CreatedDate = DateTime.Now,
+                    UserId = client.Id,
+                    Title = DateTime.Today.ToShortDateString()+" Conservation",
+                    IsClosed = false
+                };
+                _context.Add(conservation);
+                _context.SaveChanges();
+                var token = TokenHelper.GenerateJwtToken(client, conservation.Id);
                 return StatusCode(200, token);
             }
 
@@ -131,9 +144,40 @@ namespace Chatbot_Web.Controllers
                         client.Password = HashingHelper.GenerateSHA384String(input.NewPassword);
                         _context.Update(client);
                         _context.SaveChanges();
+                        return Ok("Created");
                     }
                     return BadRequest("Colud not verify Accounnt");
 
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("Logout")]
+        public async Task<IActionResult> Logout([FromQuery] string email)
+        {
+            if (email == null)
+                return BadRequest("Email Is Empty");
+            else
+            {
+                var client = _context.Users
+               .Where(x => x.Email == email && x.IsLoggedIn == true).FirstOrDefault();
+                if (client == null)
+                    return BadRequest("Colud not Logout From Not Logged In Account");
+                else
+                {
+                    client.IsLoggedIn = false;
+                    _context.Update(client);
+                    await _context.SaveChangesAsync();
+                    var conservation = await _context.Conservations
+                    .Where(x => x.UserId == client.Id).ToListAsync();
+                    foreach (var item in conservation)
+                    {
+                        item.IsClosed = true;
+                        _context.Update(item);
+                        await _context.SaveChangesAsync();
+                    }
+                    return Ok();
                 }
             }
         }

@@ -8,7 +8,7 @@ namespace Chatbot_Web.Helper
 {
     public static class TokenHelper
     {
-        public static string GenerateJwtToken(User input)
+        public static string GenerateJwtToken(User input,int conservationId)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenKey = Encoding.UTF8.GetBytes("LongSecrectStringForModulekodestartppopopopsdfjnshbvhueFGDKJSFBYJDSAGVYKDSGKFUYDGASYGFskc#$vhHJVCBYHVSKDGHASVBCL");
@@ -17,6 +17,7 @@ namespace Chatbot_Web.Helper
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                         new Claim("Email",input.Email),
+                        new Claim("ConservationId",conservationId.ToString()),
                         new Claim("UserId",input.Id.ToString())
                 }),
                 Expires = DateTime.Now.AddHours(9),
