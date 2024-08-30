@@ -2,7 +2,6 @@
 using Chatbot_Web.DTOs.Messages;
 using Chatbot_Web.Entities;
 using Chatbot_Web.Helper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -30,7 +29,7 @@ namespace Chatbot_Web.Controllers
                 Message msgEntity1 = new Message()
                 {
                     ConservationId = conser.Id,
-                    IsResponseFromChatbot = true,
+                    IsResponseFromChatbot = false,
                     Text = title,
                     CreationDate = DateTime.Now
                 };
