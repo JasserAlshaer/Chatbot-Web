@@ -26,6 +26,8 @@ namespace Chatbot_Web.Controllers
                         join user in _context.Users
                         on conservation.UserId equals user.Id
                         where conservation.Id == Id
+
+
                         select new FetchMessageDTO
                         {
                             Author = message.IsResponseFromChatbot?"Mira": user.FirstName + "-" + user.LastName,
